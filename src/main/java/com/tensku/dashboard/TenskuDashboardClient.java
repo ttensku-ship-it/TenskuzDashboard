@@ -32,9 +32,9 @@ public class TenskuDashboardClient implements ClientModInitializer {
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath("tensku_dashboard", "main"));
         openKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.tensku_dashboard.open", InputConstants.Type.KEYSYM, InputConstants.KEY_K, category));
+             "key.tensku_dashboard.open", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, category));
         danceKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.tensku_dashboard.dance", InputConstants.Type.KEYSYM, InputConstants.KEY_N, category));
+              "key.tensku_dashboard.dance", InputConstants.Type.KEYBOARD, InputConstants.KEY_N, category));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (openKey.consumeClick()) mc.setScreenAndShow(new DashboardScreen());
