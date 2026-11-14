@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -18,7 +18,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -33,9 +32,9 @@ public class TenskuDashboardClient implements ClientModInitializer {
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath("tensku_dashboard", "main"));
         openKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.tensku_dashboard.open", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, category));
+                "key.tensku_dashboard.open", InputConstants.Type.KEYSYM, InputConstants.KEY_K, category));
         danceKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.tensku_dashboard.dance", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, category));
+                "key.tensku_dashboard.dance", InputConstants.Type.KEYSYM, InputConstants.KEY_N, category));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (openKey.consumeClick()) mc.setScreenAndShow(new DashboardScreen());
@@ -49,54 +48,54 @@ public class TenskuDashboardClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             // /tauction start <seconds> <item...> | end | cancel
-            dispatcher.register(ClientCommandManager.literal("tauction")
-                    .then(ClientCommandManager.literal("start")
-                            .then(ClientCommandManager.argument("seconds", IntegerArgumentType.integer(5, 600))
-                                    .then(ClientCommandManager.argument("item", StringArgumentType.greedyString())
+            dispatcher.register(ClientCommands.literal("tauction")
+                    .then(ClientCommands.literal("start")
+                            .then(ClientCommands.argument("seconds", IntegerArgumentType.integer(5, 600))
+                                    .then(ClientCommands.argument("item", StringArgumentType.greedyString())
                                             .executes(c -> {
                                                 Auction.start(IntegerArgumentType.getInteger(c, "seconds"),
                                                         StringArgumentType.getString(c, "item"));
                                                 c.getSource().sendFeedback(Component.literal("Auction started!"));
                                                 return 1;
                                             }))))
-                    .then(ClientCommandManager.literal("end").executes(c -> { Auction.finish(); return 1; }))
-                    .then(ClientCommandManager.literal("cancel").executes(c -> { Auction.cancel(); return 1; })));
+                    .then(ClientCommands.literal("end").executes(c -> { Auction.finish(); return 1; }))
+                    .then(ClientCommands.literal("cancel").executes(c -> { Auction.cancel(); return 1; })));
 
             // /ttext ...
-            dispatcher.register(ClientCommandManager.literal("ttext")
-                    .then(ClientCommandManager.literal("set").then(ClientCommandManager.argument("text", StringArgumentType.greedyString())
+            dispatcher.register(ClientCommands.literal("ttext")
+                    .then(ClientCommands.literal("set").then(ClientCommands.argument("text", StringArgumentType.greedyString())
                             .executes(c -> { Settings.d.text = StringArgumentType.getString(c, "text"); Settings.d.textOn = true; Settings.save(); return 1; })))
-                    .then(ClientCommandManager.literal("on").executes(c -> { Settings.d.textOn = true; Settings.save(); return 1; }))
-                    .then(ClientCommandManager.literal("off").executes(c -> { Settings.d.textOn = false; Settings.save(); return 1; }))
-                    .then(ClientCommandManager.literal("size").then(ClientCommandManager.argument("n", IntegerArgumentType.integer(8, 96))
+                    .then(ClientCommands.literal("on").executes(c -> { Settings.d.textOn = true; Settings.save(); return 1; }))
+                    .then(ClientCommands.literal("off").executes(c -> { Settings.d.textOn = false; Settings.save(); return 1; }))
+                    .then(ClientCommands.literal("size").then(ClientCommands.argument("n", IntegerArgumentType.integer(8, 96))
                             .executes(c -> { Settings.d.textSize = IntegerArgumentType.getInteger(c, "n"); Settings.save(); return 1; })))
-                    .then(ClientCommandManager.literal("color").then(ClientCommandManager.argument("hex", StringArgumentType.word())
+                    .then(ClientCommands.literal("color").then(ClientCommands.argument("hex", StringArgumentType.word())
                             .executes(c -> {
                                 try { Settings.d.textColor = Integer.parseInt(StringArgumentType.getString(c, "hex").replace("#", ""), 16) & 0xFFFFFF; Settings.save(); }
                                 catch (Exception e) { c.getSource().sendFeedback(Component.literal("Use a hex color like ff00aa")); }
                                 return 1;
                             })))
-                    .then(ClientCommandManager.literal("effect").then(ClientCommandManager.argument("n", IntegerArgumentType.integer(0, 5))
+                    .then(ClientCommands.literal("effect").then(ClientCommands.argument("n", IntegerArgumentType.integer(0, 5))
                             .executes(c -> { Settings.d.effect = IntegerArgumentType.getInteger(c, "n"); Settings.save(); return 1; })))
-                    .then(ClientCommandManager.literal("pos")
-                            .then(ClientCommandManager.argument("x", DoubleArgumentType.doubleArg(0, 100))
-                                    .then(ClientCommandManager.argument("y", DoubleArgumentType.doubleArg(0, 100))
+                    .then(ClientCommands.literal("pos")
+                            .then(ClientCommands.argument("x", DoubleArgumentType.doubleArg(0, 100))
+                                    .then(ClientCommands.argument("y", DoubleArgumentType.doubleArg(0, 100))
                                             .executes(c -> {
                                                 Settings.d.tx = (float) DoubleArgumentType.getDouble(c, "x");
                                                 Settings.d.ty = (float) DoubleArgumentType.getDouble(c, "y");
                                                 Settings.save();
                                                 return 1;
                                             }))))
-                    .then(ClientCommandManager.literal("font").then(ClientCommandManager.argument("name", StringArgumentType.greedyString())
+                    .then(ClientCommands.literal("font").then(ClientCommands.argument("name", StringArgumentType.greedyString())
                             .executes(c -> { Settings.d.font = StringArgumentType.getString(c, "name"); Settings.save(); return 1; }))));
 
-            dispatcher.register(ClientCommandManager.literal("ttheme")
-                    .then(ClientCommandManager.argument("n", IntegerArgumentType.integer(0, Themes.NAMES.length - 1))
+            dispatcher.register(ClientCommands.literal("ttheme")
+                    .then(ClientCommands.argument("n", IntegerArgumentType.integer(0, Themes.NAMES.length - 1))
                             .executes(c -> { Settings.d.theme = IntegerArgumentType.getInteger(c, "n"); Settings.save(); return 1; })));
 
-            dispatcher.register(ClientCommandManager.literal("tdance")
+            dispatcher.register(ClientCommands.literal("tdance")
                     .executes(c -> { Settings.d.charOn = !Settings.d.charOn; Settings.save(); return 1; })
-                    .then(ClientCommandManager.argument("style", IntegerArgumentType.integer(0, Dancer.NAMES.length - 1))
+                    .then(ClientCommands.argument("style", IntegerArgumentType.integer(0, Dancer.NAMES.length - 1))
                             .executes(c -> { Settings.d.dance = IntegerArgumentType.getInteger(c, "style"); Settings.d.charOn = true; Settings.save(); return 1; })));
         });
 
@@ -108,12 +107,11 @@ public class TenskuDashboardClient implements ClientModInitializer {
     // The always-on overlay: text, character, balance panel, auction timer, winner animation
     static void renderHud(GuiGraphicsExtractor g, DeltaTracker dt) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui) return;
         int W = mc.getWindow().getGuiScaledWidth(), H = mc.getWindow().getGuiScaledHeight();
         float t = System.currentTimeMillis() / 1000f;
 
         PixelText.drawOverlay(g, W, H, t);
-        if (mc.screen != null) return;
+        if (mc.gui.screen() != null) return;
 
         if (Settings.d.charOn) {
             float s = 2f;
@@ -124,7 +122,7 @@ public class TenskuDashboardClient implements ClientModInitializer {
         if (Settings.d.hudOn) {
             List<Tracker.Payment> day = Tracker.inRange(86400000L);
             double profit = Tracker.received(day) - Tracker.sent(day);
-            int x = Settings.d.charRight ? 8 : 8, y = 8, w = 124, h = 42;
+            int x = 8, y = 8, w = 124, h = 42;
             float yaw = (float) Math.sin(t / 1.5) * 22f;
 
             var pose = g.pose();
