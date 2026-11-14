@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "tensku_dashboard",
+  "version": "${version}",
+  "name": "Tensku Dashboard",
+  "description": "A 3D dashboard overlay that tracks your balance and payments from chat.",
+  "authors": ["Tensku"],
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.tensku.dashboard.TenskuDashboardClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
